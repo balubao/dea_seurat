@@ -1,3 +1,27 @@
+# visualize DEA using Dot plots
+rule dotplot:
+    input:
+        dea_results = os.path.join(result_path,'{analysis}','DEA_results.csv'),
+        seurat_object = get_data_path,
+    output:
+        dea_lfc_dotplot = report(os.path.join(result_path,'{analysis}','plots','DEA_LFC_dotplot.png'),
+                           caption="../report/lfc_dotplot.rst",
+                           category="{}_dea_seurat".format(config["project_name"]),
+                           subcategory="{analysis}"),
+    resources:
+        mem_mb=config.get("mem", "16000"),
+    threads: config.get("threads", 1)
+    conda:
+        "../envs/dotplot.yaml"
+    log:
+        os.path.join("logs","rules","lfc_dotplot_{analysis}.log"),
+    params:
+        partition=config.get("partition"),
+        assay = lambda w: annot_dict["{}".format(w.analysis)]["assay"],
+        metadata = lambda w: annot_dict["{}".format(w.analysis)]["metadata"],
+        control = lambda w: annot_dict["{}".format(w.analysis)]["control"],
+    script:
+        "../scripts/dotplot.R"
 
 # visualize DEA using volcano plots
 rule volcanos:
